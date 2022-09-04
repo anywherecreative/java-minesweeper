@@ -1,5 +1,3 @@
-
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -29,17 +27,18 @@ import javafx.geometry.Pos;
  * @version 1.0.0
  */
 public class Board extends Application {
-    private final int BOARD_WIDTH  = 600;
-    private final int BOARD_HEIGHT = 600;
-    private final int SQUARE_SIZE  = 60;
-    private final int SQUARE_SPACE = 10; //padding around board, and between squares
-    private final int COLS         = 10;
-    private final int MINES        = 10; //how many mines should be on the board
+    public static final int BOARD_WIDTH  = 600;
+    public static final int BOARD_HEIGHT = 600;
+    public static final int SQUARE_SIZE  = 60;
+    public static final int SQUARE_SPACE = 10; //padding around board, and between squares
+    public static final int COLS         = 10;
+    public static final int MINES        = 10; //how many mines should be on the board
     
     ArrayList<MineButton> squares = new ArrayList<MineButton>();
     Stage loseDialog;
     Stage winDialog;
     int cleared = 0;
+    boolean gameDone = false;
     
     /**
      * Setup the board, add the buttons and assign mines
@@ -52,20 +51,28 @@ public class Board extends Application {
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
         pane.setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
+        stage.setResizable(false);
+        
         pane.setVgap(SQUARE_SPACE);
         pane.setHgap(SQUARE_SPACE);
         
         //create the button grid
         for(int a = 0;a < COLS*COLS;a++) {
-            MineButton btn = new MineButton("");
-            btn.setPrefWidth(SQUARE_SIZE);
-            btn.setPrefHeight(SQUARE_SIZE);
-            btn.setOnMouseClicked(this::buttonClick);
-            squares.add(btn);
             int row = a/COLS;
             int col = a%COLS;
+            
+            MineButton btn = new MineButton();
+            
+            btn.setPrefWidth(SQUARE_SIZE);
+            btn.setPrefHeight(SQUARE_SIZE);
+            
+            btn.setOnMouseClicked(this::buttonClick);
+            
             btn.setRow(row);
             btn.setCol(col);
+            
+            squares.add(btn);
+            
             pane.add(squares.get(a),row, col);
         }
         
@@ -97,7 +104,7 @@ public class Board extends Application {
         
         MineButton btn = (MineButton)event.getSource();
         if(button == MouseButton.PRIMARY) {
-            if(btn.isFlagged()) {
+            if(btn.isFlagged() || gameDone) {
                 return;
             }
             btn.setDisable(true);
@@ -112,20 +119,14 @@ public class Board extends Application {
                 checkWin(btn.getScene().getWindow()); //check if we've checked all but the mine squares
             }
             else {
+                gameDone = true;  
+                btn.setExploded(true);
                 showLose(btn.getScene().getWindow());
             }
         }
         else {
             if(!btn.isDisabled()) {
-                if(btn.isFlagged()) {
-                    btn.setText("");
-                    btn.setFlag(false);
-                }
-                else {
-                    btn.setText("F");
-                    btn.setFlag(true);
-                }
-                
+                btn.toggleFlag();
             }
             
         }
@@ -267,6 +268,13 @@ public class Board extends Application {
     }
     
     private void showLose(Window window) {
+        
+        Iterator<MineButton> btns = squares.iterator();
+        while(btns.hasNext()) {
+            MineButton btn = btns.next();
+            btn.revealMine();
+        }
+                
         loseDialog = new Stage();
         loseDialog.initModality(Modality.APPLICATION_MODAL);
         loseDialog.initOwner(window);
@@ -286,6 +294,7 @@ public class Board extends Application {
     public void checkWin(Window window) {
         int squaresToClear = COLS*COLS-MINES;
         if(cleared == squaresToClear) {
+            gameDone = true;
             winDialog = new Stage();
             winDialog.initModality(Modality.APPLICATION_MODAL);
             winDialog.initOwner(window);
@@ -321,6 +330,7 @@ public class Board extends Application {
     
     private void resetBoard() {
         cleared = 0;
+        gameDone = false;
         Iterator<MineButton> resetIterator = squares.iterator();
         while(resetIterator.hasNext()) {
             MineButton btn = resetIterator.next();

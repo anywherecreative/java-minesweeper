@@ -18,6 +18,7 @@ import javafx.stage.WindowEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 
 /**
@@ -48,9 +49,20 @@ public class Board extends Application {
     @Override
     public void start(Stage stage) {
         
+        VBox mane = new VBox();
+        mane.setAlignment(Pos.CENTER);
+        mane.setSpacing(0);
+        mane.setPadding(new Insets(10,10,10,10));
+
+        
+        HBox comPanel = new HBox();
+        comPanel.setAlignment(Pos.CENTER);
+        TimeLabel time = new TimeLabel("00:00");
+        
+        mane.getChildren().add(time);
+        
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
-        pane.setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
         stage.setResizable(false);
         
         pane.setVgap(SQUARE_SPACE);
@@ -76,10 +88,13 @@ public class Board extends Application {
             pane.add(squares.get(a),row, col);
         }
         
+        mane.getChildren().add(comPanel);
+        mane.getChildren().add(pane);
+        
         seedMines();
 
         // JavaFX must have a Scene (window content) inside a Stage (window)
-        Scene scene = new Scene(pane, BOARD_WIDTH,BOARD_HEIGHT);
+        Scene scene = new Scene(mane, BOARD_WIDTH,BOARD_HEIGHT);
         stage.setTitle("Mine Sweeper");
         stage.setScene(scene);
         

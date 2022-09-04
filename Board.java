@@ -6,8 +6,11 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.geometry.Insets;
 import javafx.application.Platform;
+import javafx.stage.Window;
+import javafx.stage.Modality;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.text.Text;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import java.util.ArrayList;
@@ -16,6 +19,8 @@ import java.util.Collections;
 import javafx.stage.WindowEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
+import javafx.geometry.Pos;
 
 /**
  * Main Application Interface For MineSweeper
@@ -32,6 +37,7 @@ public class Board extends Application {
     private final int MINES        = 10; //how many mines should be on the board
     
     ArrayList<MineButton> squares = new ArrayList<MineButton>();
+    Stage loseDialog;
     
     
     /**
@@ -42,7 +48,6 @@ public class Board extends Application {
     @Override
     public void start(Stage stage) {
         
-        int mines = 0;
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
         pane.setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
@@ -91,6 +96,9 @@ public class Board extends Application {
         
         MineButton btn = (MineButton)event.getSource();
         if(button == MouseButton.PRIMARY) {
+            if(btn.isFlagged()) {
+                return;
+            }
             btn.setDisable(true);
             if(!btn.isAMine()) {
                 if(btn.getMineCount() > 0) {  
@@ -101,7 +109,7 @@ public class Board extends Application {
                 }
             }
             else {
-                btn.setText("M");
+                showLose(btn.getScene().getWindow());
             }
         }
         else {
@@ -249,5 +257,33 @@ public class Board extends Application {
                 break;
             }
         }
+    }
+    
+    private void showLose(Window window) {
+        loseDialog = new Stage();
+        loseDialog.initModality(Modality.APPLICATION_MODAL);
+        loseDialog.initOwner(window);
+        
+        Button okBtn = new Button("Continue");
+        okBtn.setOnMouseClicked(this::resetBoard);
+
+        VBox dialogVbox = new VBox(20);
+        dialogVbox.setAlignment(Pos.CENTER);
+        dialogVbox.getChildren().add(new Text("You Lose! Play Again?"));
+        dialogVbox.getChildren().add(okBtn);
+        Scene dialogScene = new Scene(dialogVbox, 300, 200);
+        loseDialog.setScene(dialogScene);
+        loseDialog.show();
+    }
+    
+    public void resetBoard(MouseEvent event) {
+        Iterator<MineButton> resetIterator = squares.iterator();
+        while(resetIterator.hasNext()) {
+            MineButton btn = resetIterator.next();
+            btn.reset();
+        }
+        seedMines();
+        loseDialog.hide();
+        loseDialog.close();
     }
 }

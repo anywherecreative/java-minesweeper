@@ -61,5 +61,13 @@ public class MineButton extends Button
     public boolean isFlagged() {
          return isFlagged;   
     }
+    
+    public void reset() {
+        isMine = false;
+        mineCount = 0;
+        isFlagged = false;
+        super.setDisable(false);
+        super.setText("");
+    }
 
 }

@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Collections;
 import javafx.stage.WindowEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
 
 /**
- * Write a description of JavaFX class Board here.
+ * Main Application Interface For MineSweeper
  *
- * @author (your name)
- * @version (a version number or a date)
+ * @author Jeff Manning
+ * @version 1.0.0
  */
 public class Board extends Application {
     private final int BOARD_WIDTH  = 600;
@@ -52,7 +54,7 @@ public class Board extends Application {
             MineButton btn = new MineButton("");
             btn.setPrefWidth(SQUARE_SIZE);
             btn.setPrefHeight(SQUARE_SIZE);
-            btn.setOnAction(this::buttonClick);
+            btn.setOnMouseClicked(this::buttonClick);
             squares.add(btn);
             int row = a/COLS;
             int col = a%COLS;
@@ -62,12 +64,7 @@ public class Board extends Application {
         }
         
         seedMines();
-        
- 
-        
-        
 
-      
         // JavaFX must have a Scene (window content) inside a Stage (window)
         Scene scene = new Scene(pane, BOARD_WIDTH,BOARD_HEIGHT);
         stage.setTitle("Mine Sweeper");
@@ -81,30 +78,45 @@ public class Board extends Application {
             }
         });
 
-
-
         // Show the Stage (window)
         stage.show();
     }
 
 
     /**
-     * This will be executed when the button is clicked
-     * It increments the count by 1
+     * Mine has been clicked, check if it's a mine, close to one, or nothing
      */
-    private void buttonClick(ActionEvent event) {
+    private void buttonClick(MouseEvent event) {
+        MouseButton button = event.getButton();
+        
         MineButton btn = (MineButton)event.getSource();
-        btn.setDisable(true);
-        if(!btn.isAMine()) {
-            if(btn.getMineCount() > 0) {  
-                btn.setText(Integer.toString(btn.getMineCount()));
+        if(button == MouseButton.PRIMARY) {
+            btn.setDisable(true);
+            if(!btn.isAMine()) {
+                if(btn.getMineCount() > 0) {  
+                    btn.setText(Integer.toString(btn.getMineCount()));
+                }
+                else {
+                    checkNeighboursAreClear(btn); //if it's blank, open any ajacent mines that are blank
+                }
             }
             else {
-                checkNeighboursAreClear(btn); //if it's blank, open any ajacent mines that are blank
+                btn.setText("M");
             }
         }
         else {
-            btn.setText("M");
+            if(!btn.isDisabled()) {
+                if(btn.isFlagged()) {
+                    btn.setText("");
+                    btn.setFlag(false);
+                }
+                else {
+                    btn.setText("F");
+                    btn.setFlag(true);
+                }
+                
+            }
+            
         }
     }
     
@@ -225,6 +237,7 @@ public class Board extends Application {
                             }
                             else {
                                 neighbour.setText(Integer.toString(neighbour.getMineCount()));
+                                neighbour.setDisable(true);
                             }
                         }
                     }

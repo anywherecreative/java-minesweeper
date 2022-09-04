@@ -6,6 +6,7 @@ public class MineButton extends Button
     private int col;
     private boolean isMine; //is it a mine or not?
     private int mineCount; //how many mines touch this one
+    private boolean isFlagged;
     public String debugValue = "";
     
     public MineButton(String value) {
@@ -51,6 +52,14 @@ public class MineButton extends Button
     
     public void addNeighbourMine() {
         this.mineCount++;
+    }
+    
+    public void setFlag(boolean flag) {
+        this.isFlagged = flag;
+    }
+    
+    public boolean isFlagged() {
+         return isFlagged;   
     }
 
 }

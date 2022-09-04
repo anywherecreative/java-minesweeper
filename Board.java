@@ -86,8 +86,7 @@ public class Board extends Application {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
-                Platform.exit();
-                System.exit(0);
+                exitGame();
             }
         });
 
@@ -281,11 +280,16 @@ public class Board extends Application {
         
         Button okBtn = new Button("Continue");
         okBtn.setOnMouseClicked(this::resetBoardLose);
+        
+        Button exitBtn = new Button("Exit");
+        exitBtn.setOnMouseClicked(this::exitGameBtn);
 
         VBox dialogVbox = new VBox(20);
         dialogVbox.setAlignment(Pos.CENTER);
         dialogVbox.getChildren().add(new Text("You Lose! Play Again?"));
         dialogVbox.getChildren().add(okBtn);
+        dialogVbox.getChildren().add(exitBtn);
+        
         Scene dialogScene = new Scene(dialogVbox, 300, 200);
         loseDialog.setScene(dialogScene);
         loseDialog.show();
@@ -301,11 +305,17 @@ public class Board extends Application {
             
             Button okBtn = new Button("Continue");
             okBtn.setOnMouseClicked(this::resetBoardWin);
-    
+
+            Button exitBtn = new Button("Exit");
+            exitBtn.setOnMouseClicked(this::exitGameBtn);
+            
+            
             VBox dialogVbox = new VBox(20);
             dialogVbox.setAlignment(Pos.CENTER);
             dialogVbox.getChildren().add(new Text("You Win! Play Again?"));
             dialogVbox.getChildren().add(okBtn);
+            dialogVbox.getChildren().add(exitBtn);
+            
             Scene dialogScene = new Scene(dialogVbox, 300, 200);
             winDialog.setScene(dialogScene);
             winDialog.show();
@@ -339,6 +349,16 @@ public class Board extends Application {
         seedMines();
     }
     
-
+    private void exitGame() {
+        Platform.exit();
+        System.exit(0);
+    }
+    
+    /**
+     * alias for exitGame handles button event
+     */
+    private void exitGameBtn(MouseEvent e) {
+        exitGame();
+    }
 
 }

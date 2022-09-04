@@ -19,9 +19,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.control.ContentDisplay;
 
 /**
  * Main Application Interface For MineSweeper
@@ -30,12 +27,12 @@ import javafx.scene.control.ContentDisplay;
  * @version 1.0.0
  */
 public class Board extends Application {
-    private final int BOARD_WIDTH  = 600;
-    private final int BOARD_HEIGHT = 600;
-    private final int SQUARE_SIZE  = 60;
-    private final int SQUARE_SPACE = 10; //padding around board, and between squares
-    private final int COLS         = 10;
-    private final int MINES        = 10; //how many mines should be on the board
+    public static final int BOARD_WIDTH  = 600;
+    public static final int BOARD_HEIGHT = 600;
+    public static final int SQUARE_SIZE  = 60;
+    public static final int SQUARE_SPACE = 10; //padding around board, and between squares
+    public static final int COLS         = 10;
+    public static final int MINES        = 10; //how many mines should be on the board
     
     ArrayList<MineButton> squares = new ArrayList<MineButton>();
     Stage loseDialog;
@@ -123,27 +120,13 @@ public class Board extends Application {
             }
             else {
                 gameDone = true;  
-                ImageView view = new ImageView(new Image("assets/explosion-solid.png"));
-                view.setFitHeight(SQUARE_SIZE/3);
-                view.setPreserveRatio(true);
-                
-                btn.setGraphic(view);
-                btn.setContentDisplay(ContentDisplay.TOP);
                 btn.setExploded(true);
                 showLose(btn.getScene().getWindow());
             }
         }
         else {
             if(!btn.isDisabled()) {
-                if(btn.isFlagged()) {
-                    btn.setText("");
-                    btn.setFlag(false);
-                }
-                else {
-                    btn.setText("F");
-                    btn.setFlag(true);
-                }
-                
+                btn.toggleFlag();
             }
             
         }
@@ -289,14 +272,7 @@ public class Board extends Application {
         Iterator<MineButton> btns = squares.iterator();
         while(btns.hasNext()) {
             MineButton btn = btns.next();
-            if(btn.isAMine() && !btn.isExploded()) {
-                ImageView view = new ImageView(new Image("assets/bomb-solid.png"));
-                view.setFitHeight(SQUARE_SIZE/3);
-                view.setPreserveRatio(true);
-                
-                btn.setGraphic(view);
-                btn.setContentDisplay(ContentDisplay.TOP);
-            }
+            btn.revealMine();
         }
                 
         loseDialog = new Stage();

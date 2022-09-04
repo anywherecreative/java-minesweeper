@@ -38,7 +38,8 @@ public class Board extends Application {
     
     ArrayList<MineButton> squares = new ArrayList<MineButton>();
     Stage loseDialog;
-    
+    Stage winDialog;
+    int cleared = 0;
     
     /**
      * Setup the board, add the buttons and assign mines
@@ -101,12 +102,14 @@ public class Board extends Application {
             }
             btn.setDisable(true);
             if(!btn.isAMine()) {
+                cleared++;
                 if(btn.getMineCount() > 0) {  
                     btn.setText(Integer.toString(btn.getMineCount()));
                 }
                 else {
                     checkNeighboursAreClear(btn); //if it's blank, open any ajacent mines that are blank
                 }
+                checkWin(btn.getScene().getWindow()); //check if we've checked all but the mine squares
             }
             else {
                 showLose(btn.getScene().getWindow());
@@ -226,13 +229,16 @@ public class Board extends Application {
         ArrayList<MineButton> checkList = getNeighbours(btn);
         ArrayList<Integer> indexes = new ArrayList<Integer>();
         
-        int a =0;
-        while(a < 100) {
+        int a = 0;
+        
+        //limiting the while to the total number of squares to prevent an infinite loop
+        while(a < COLS*COLS) {
             MineButton check = checkList.get(a);
             indexes.add(getIndexFromRowCol(check.getRow(), check.getCol()));
             
             if(!check.isDisabled() && check.getMineCount() == 0 && !check.isAMine()) {
                 check.setDisable(true);
+                cleared++;
                 ArrayList<MineButton> neighbours = getNeighbours(check);
                 Iterator<MineButton> neighboursIterator = neighbours.iterator();
                 while(neighboursIterator.hasNext()) {
@@ -246,6 +252,7 @@ public class Board extends Application {
                             else {
                                 neighbour.setText(Integer.toString(neighbour.getMineCount()));
                                 neighbour.setDisable(true);
+                                cleared++;
                             }
                         }
                     }
@@ -265,7 +272,7 @@ public class Board extends Application {
         loseDialog.initOwner(window);
         
         Button okBtn = new Button("Continue");
-        okBtn.setOnMouseClicked(this::resetBoard);
+        okBtn.setOnMouseClicked(this::resetBoardLose);
 
         VBox dialogVbox = new VBox(20);
         dialogVbox.setAlignment(Pos.CENTER);
@@ -276,14 +283,52 @@ public class Board extends Application {
         loseDialog.show();
     }
     
-    public void resetBoard(MouseEvent event) {
+    public void checkWin(Window window) {
+        int squaresToClear = COLS*COLS-MINES;
+        if(cleared == squaresToClear) {
+            winDialog = new Stage();
+            winDialog.initModality(Modality.APPLICATION_MODAL);
+            winDialog.initOwner(window);
+            
+            Button okBtn = new Button("Continue");
+            okBtn.setOnMouseClicked(this::resetBoardWin);
+    
+            VBox dialogVbox = new VBox(20);
+            dialogVbox.setAlignment(Pos.CENTER);
+            dialogVbox.getChildren().add(new Text("You Win! Play Again?"));
+            dialogVbox.getChildren().add(okBtn);
+            Scene dialogScene = new Scene(dialogVbox, 300, 200);
+            winDialog.setScene(dialogScene);
+            winDialog.show();
+        }
+        else {
+            System.out.println(Integer.toString(squaresToClear) + " > " + Integer.toString(cleared));
+        }
+        
+    }
+    
+    private void resetBoardLose(MouseEvent event) {
+        loseDialog.hide();
+        loseDialog.close();
+        resetBoard();
+    }
+    
+    private void resetBoardWin(MouseEvent event) {
+        winDialog.hide();
+        winDialog.close();
+        resetBoard();
+    }
+    
+    private void resetBoard() {
+        cleared = 0;
         Iterator<MineButton> resetIterator = squares.iterator();
         while(resetIterator.hasNext()) {
             MineButton btn = resetIterator.next();
             btn.reset();
         }
         seedMines();
-        loseDialog.hide();
-        loseDialog.close();
     }
+    
+
+
 }

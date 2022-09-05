@@ -28,8 +28,8 @@ import javafx.geometry.Pos;
  * @version 1.0.0
  */
 public class Board extends Application {
-    public static final int BOARD_WIDTH  = 600;
-    public static final int BOARD_HEIGHT = 600;
+    public static final int BOARD_WIDTH  = 700;
+    public static final int BOARD_HEIGHT = 750;
     public static final int SQUARE_SIZE  = 60;
     public static final int SQUARE_SPACE = 10; //padding around board, and between squares
     public static final int COLS         = 10;

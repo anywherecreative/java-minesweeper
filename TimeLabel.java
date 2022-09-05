@@ -10,15 +10,16 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
 
-
 public class TimeLabel extends Label
 {
     private Timer gameTimer;
-    private int timeElapsed; 
+    private int timeElapsed;
+    private boolean overtime = false;
+
     public TimeLabel(String value) {
         super(value);
         timeElapsed = 0;
-        
+
         try {
             InputStream fontStream = TimeLabel.class.getResourceAsStream("assets/digitaldream.ttf");
             if (fontStream != null) {
@@ -41,13 +42,23 @@ public class TimeLabel extends Label
         gameTimer = new Timer();
         TimerTask incrementClock = new TimerTask() {
                 public void run() {
-                    System.out.println("run");
                     timeElapsed++;
+                    if(timeElapsed == Integer.MAX_VALUE) {
+                        timeElapsed = 0;
+                        overtime=true;
+                    }
                     Platform.runLater(new Runnable() {
-                        @Override public void run() {
-                            setText(Integer.toString(timeElapsed));
-                        }
-                    });
+                            @Override public void run() {
+                                int minutes = timeElapsed/60;
+                                int seconds = timeElapsed%60;
+                                if(!overtime) {
+                                    setText(String.format("%02d", minutes) + ":" + String.format("%02d", seconds));
+                                }
+                                else {
+                                    setText(String.format("%02d", minutes) + ":" + String.format("%02d", seconds) + " E");
+                                }
+                            }
+                        });
                 } 
             };
         gameTimer.schedule(incrementClock,0, 1000);

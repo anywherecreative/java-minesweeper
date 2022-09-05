@@ -61,6 +61,7 @@ public class Board extends Application {
         
         gameTime = new TimeLabel("00:00");
         reset = new ResetButton();
+        reset.setOnMouseClicked(this::resetButtonClick);
         
         comPanel.setLeft(gameTime);
         comPanel.setRight(reset);
@@ -377,9 +378,14 @@ public class Board extends Application {
         resetBoard();
     }
     
+    private void resetButtonClick(MouseEvent event) {
+        resetBoard();
+    }
+    
     private void resetBoard() {
         cleared = 0;
         gameDone = false;
+        gameTime.stopTimer(); //needed for when the reset button is clicked
         gameTime.resetTimer();
         reset.setHappy();
         Iterator<MineButton> resetIterator = squares.iterator();

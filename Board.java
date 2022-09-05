@@ -18,6 +18,7 @@ import javafx.stage.WindowEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 import javafx.geometry.Pos;
 
 /**
@@ -39,6 +40,8 @@ public class Board extends Application {
     Stage winDialog;
     int cleared = 0;
     boolean gameDone = false;
+    TimeLabel gameTime;
+    ResetButton reset;
     
     /**
      * Setup the board, add the buttons and assign mines
@@ -48,9 +51,23 @@ public class Board extends Application {
     @Override
     public void start(Stage stage) {
         
+        VBox mane = new VBox();
+        mane.setAlignment(Pos.CENTER);
+        mane.setSpacing(0);
+        mane.setPadding(new Insets(10,10,10,10));
+        
+        BorderPane comPanel = new BorderPane();
+        comPanel.setPadding(new Insets(0,10,0,10));
+        
+        gameTime = new TimeLabel("00:00");
+        reset = new ResetButton();
+        reset.setOnMouseClicked(this::resetButtonClick);
+        
+        comPanel.setLeft(gameTime);
+        comPanel.setRight(reset);
+        
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
-        pane.setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
         stage.setResizable(false);
         
         pane.setVgap(SQUARE_SPACE);
@@ -67,6 +84,7 @@ public class Board extends Application {
             btn.setPrefHeight(SQUARE_SIZE);
             
             btn.setOnMouseClicked(this::buttonClick);
+            btn.setOnMousePressed(this::buttonPressed);
             
             btn.setRow(row);
             btn.setCol(col);
@@ -76,10 +94,13 @@ public class Board extends Application {
             pane.add(squares.get(a),row, col);
         }
         
+        mane.getChildren().add(comPanel);
+        mane.getChildren().add(pane);
+        
         seedMines();
 
         // JavaFX must have a Scene (window content) inside a Stage (window)
-        Scene scene = new Scene(pane, BOARD_WIDTH,BOARD_HEIGHT);
+        Scene scene = new Scene(mane, BOARD_WIDTH,BOARD_HEIGHT);
         stage.setTitle("Mine Sweeper");
         stage.setScene(scene);
         
@@ -104,10 +125,17 @@ public class Board extends Application {
         MineButton btn = (MineButton)event.getSource();
         if(button == MouseButton.PRIMARY) {
             if(btn.isFlagged() || gameDone) {
+                reset.setHappy();
                 return;
             }
+            
+            if(!gameTime.isRunning()) {
+                gameTime.startTimer();
+            }
+            
             btn.setDisable(true);
             if(!btn.isAMine()) {
+                reset.setHappy();
                 cleared++;
                 if(btn.getMineCount() > 0) {  
                     btn.setText(Integer.toString(btn.getMineCount()));
@@ -118,7 +146,9 @@ public class Board extends Application {
                 checkWin(btn.getScene().getWindow()); //check if we've checked all but the mine squares
             }
             else {
-                gameDone = true;  
+                reset.setDead();
+                gameDone = true;
+                gameTime.stopTimer();
                 btn.setExploded(true);
                 showLose(btn.getScene().getWindow());
             }
@@ -126,8 +156,16 @@ public class Board extends Application {
         else {
             if(!btn.isDisabled()) {
                 btn.toggleFlag();
+                reset.setHappy();
             }
             
+        }
+    }
+    
+    private void buttonPressed(MouseEvent event) {
+        MouseButton button = event.getButton();
+         if(button == MouseButton.PRIMARY) {
+            reset.setShock();
         }
     }
     
@@ -298,6 +336,8 @@ public class Board extends Application {
     public void checkWin(Window window) {
         int squaresToClear = COLS*COLS-MINES;
         if(cleared == squaresToClear) {
+            reset.setWin();
+            gameTime.stopTimer();
             gameDone = true;
             winDialog = new Stage();
             winDialog.initModality(Modality.APPLICATION_MODAL);
@@ -338,9 +378,16 @@ public class Board extends Application {
         resetBoard();
     }
     
+    private void resetButtonClick(MouseEvent event) {
+        resetBoard();
+    }
+    
     private void resetBoard() {
         cleared = 0;
         gameDone = false;
+        gameTime.stopTimer(); //needed for when the reset button is clicked
+        gameTime.resetTimer();
+        reset.setHappy();
         Iterator<MineButton> resetIterator = squares.iterator();
         while(resetIterator.hasNext()) {
             MineButton btn = resetIterator.next();

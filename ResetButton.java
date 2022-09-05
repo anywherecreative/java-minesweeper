@@ -17,6 +17,7 @@ public class ResetButton extends Button {
     
     private void setup() {
         setHappy();
+        setPrefWidth(Board.SQUARE_SIZE);
     }
     
     /**
@@ -36,6 +37,18 @@ public class ResetButton extends Button {
      */
     public void setHappy() {
         ImageView view = new ImageView(new Image("assets/face-smile-solid.png"));
+        view.setFitHeight(Board.SQUARE_SIZE/3);
+        view.setPreserveRatio(true);
+        
+        setGraphic(view);
+        setContentDisplay(ContentDisplay.TOP);
+    }
+
+    /**
+     * set thei icon to a sweating but happy face
+     */
+    public void setWin() {
+        ImageView view = new ImageView(new Image("assets/face-grin-beam-sweat-solid.png"));
         view.setFitHeight(Board.SQUARE_SIZE/3);
         view.setPreserveRatio(true);
         

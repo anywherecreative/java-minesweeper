@@ -18,7 +18,7 @@ import javafx.stage.WindowEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.BorderPane;
 import javafx.geometry.Pos;
 
 /**
@@ -41,6 +41,7 @@ public class Board extends Application {
     int cleared = 0;
     boolean gameDone = false;
     TimeLabel gameTime;
+    ResetButton reset;
     
     /**
      * Setup the board, add the buttons and assign mines
@@ -54,13 +55,15 @@ public class Board extends Application {
         mane.setAlignment(Pos.CENTER);
         mane.setSpacing(0);
         mane.setPadding(new Insets(10,10,10,10));
-
         
-        HBox comPanel = new HBox();
-        comPanel.setAlignment(Pos.CENTER);
+        BorderPane comPanel = new BorderPane();
+        comPanel.setPadding(new Insets(0,10,0,10));
+        
         gameTime = new TimeLabel("00:00");
+        reset = new ResetButton();
         
-        mane.getChildren().add(gameTime);
+        comPanel.setLeft(gameTime);
+        comPanel.setRight(reset);
         
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
@@ -80,6 +83,7 @@ public class Board extends Application {
             btn.setPrefHeight(SQUARE_SIZE);
             
             btn.setOnMouseClicked(this::buttonClick);
+            btn.setOnMousePressed(this::buttonPressed);
             
             btn.setRow(row);
             btn.setCol(col);
@@ -120,6 +124,7 @@ public class Board extends Application {
         MineButton btn = (MineButton)event.getSource();
         if(button == MouseButton.PRIMARY) {
             if(btn.isFlagged() || gameDone) {
+                reset.setHappy();
                 return;
             }
             
@@ -129,6 +134,7 @@ public class Board extends Application {
             
             btn.setDisable(true);
             if(!btn.isAMine()) {
+                reset.setHappy();
                 cleared++;
                 if(btn.getMineCount() > 0) {  
                     btn.setText(Integer.toString(btn.getMineCount()));
@@ -139,6 +145,7 @@ public class Board extends Application {
                 checkWin(btn.getScene().getWindow()); //check if we've checked all but the mine squares
             }
             else {
+                reset.setDead();
                 gameDone = true;
                 gameTime.stopTimer();
                 btn.setExploded(true);
@@ -148,8 +155,16 @@ public class Board extends Application {
         else {
             if(!btn.isDisabled()) {
                 btn.toggleFlag();
+                reset.setHappy();
             }
             
+        }
+    }
+    
+    private void buttonPressed(MouseEvent event) {
+        MouseButton button = event.getButton();
+         if(button == MouseButton.PRIMARY) {
+            reset.setShock();
         }
     }
     
@@ -320,6 +335,7 @@ public class Board extends Application {
     public void checkWin(Window window) {
         int squaresToClear = COLS*COLS-MINES;
         if(cleared == squaresToClear) {
+            reset.setWin();
             gameTime.stopTimer();
             gameDone = true;
             winDialog = new Stage();
@@ -365,6 +381,7 @@ public class Board extends Application {
         cleared = 0;
         gameDone = false;
         gameTime.resetTimer();
+        reset.setHappy();
         Iterator<MineButton> resetIterator = squares.iterator();
         while(resetIterator.hasNext()) {
             MineButton btn = resetIterator.next();

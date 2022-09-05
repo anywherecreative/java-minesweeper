@@ -40,6 +40,7 @@ public class Board extends Application {
     Stage winDialog;
     int cleared = 0;
     boolean gameDone = false;
+    TimeLabel gameTime;
     
     /**
      * Setup the board, add the buttons and assign mines
@@ -57,9 +58,9 @@ public class Board extends Application {
         
         HBox comPanel = new HBox();
         comPanel.setAlignment(Pos.CENTER);
-        TimeLabel time = new TimeLabel("00:00");
+        gameTime = new TimeLabel("00:00");
         
-        mane.getChildren().add(time);
+        mane.getChildren().add(gameTime);
         
         GridPane pane = new GridPane();
         pane.setPadding(new Insets(SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE, SQUARE_SPACE));
@@ -121,6 +122,11 @@ public class Board extends Application {
             if(btn.isFlagged() || gameDone) {
                 return;
             }
+            
+            if(!gameTime.isRunning()) {
+                gameTime.startTimer();
+            }
+            
             btn.setDisable(true);
             if(!btn.isAMine()) {
                 cleared++;
@@ -133,7 +139,8 @@ public class Board extends Application {
                 checkWin(btn.getScene().getWindow()); //check if we've checked all but the mine squares
             }
             else {
-                gameDone = true;  
+                gameDone = true;
+                gameTime.stopTimer();
                 btn.setExploded(true);
                 showLose(btn.getScene().getWindow());
             }
@@ -313,6 +320,7 @@ public class Board extends Application {
     public void checkWin(Window window) {
         int squaresToClear = COLS*COLS-MINES;
         if(cleared == squaresToClear) {
+            gameTime.stopTimer();
             gameDone = true;
             winDialog = new Stage();
             winDialog.initModality(Modality.APPLICATION_MODAL);
@@ -356,6 +364,7 @@ public class Board extends Application {
     private void resetBoard() {
         cleared = 0;
         gameDone = false;
+        gameTime.resetTimer();
         Iterator<MineButton> resetIterator = squares.iterator();
         while(resetIterator.hasNext()) {
             MineButton btn = resetIterator.next();

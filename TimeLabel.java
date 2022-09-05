@@ -13,12 +13,16 @@ import javafx.application.Platform;
 public class TimeLabel extends Label
 {
     private Timer gameTimer;
+    private TimerTask incrementClock;
     private int timeElapsed;
-    private boolean overtime = false;
+    private boolean overtime;
+    private boolean running;
 
     public TimeLabel(String value) {
         super(value);
         timeElapsed = 0;
+        running = false;
+        overtime = false;
 
         try {
             InputStream fontStream = TimeLabel.class.getResourceAsStream("assets/digitaldream.ttf");
@@ -35,12 +39,12 @@ public class TimeLabel extends Label
         setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
         setTextFill(Color.RED);
         setPadding(new Insets(5,10,10,10));
-        startTimer();
     }
 
     public void startTimer() {
+        running = true;
         gameTimer = new Timer();
-        TimerTask incrementClock = new TimerTask() {
+        incrementClock = new TimerTask() {
                 public void run() {
                     timeElapsed++;
                     if(timeElapsed == Integer.MAX_VALUE) {
@@ -63,4 +67,19 @@ public class TimeLabel extends Label
             };
         gameTimer.schedule(incrementClock,0, 1000);
     }
+    
+    public void stopTimer() {
+        running = false;
+        incrementClock.cancel();
+    }
+    
+    public void resetTimer() {
+        timeElapsed = 0;
+        setText("00:00");
+    }
+    
+    public boolean isRunning() {
+        return running;
+    }
+     
 }

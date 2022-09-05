@@ -1,5 +1,6 @@
+package com.anywherecreative.intellisweeper;
+
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.geometry.Insets;
@@ -7,13 +8,13 @@ import javafx.application.Platform;
 import javafx.stage.Window;
 import javafx.stage.Modality;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Collections;
+import java.util.Iterator;
+
 import javafx.stage.WindowEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.MouseButton;
@@ -42,7 +43,9 @@ public class Board extends Application {
     boolean gameDone = false;
     TimeLabel gameTime;
     ResetButton reset;
-    
+    private int row;
+    private int col;
+
     /**
      * Setup the board, add the buttons and assign mines
      *
@@ -134,7 +137,7 @@ public class Board extends Application {
             }
             
             btn.setDisable(true);
-            if(!btn.isAMine()) {
+            if(btn.isNotAMine()) {
                 reset.setHappy();
                 cleared++;
                 if(btn.getMineCount() > 0) {  
@@ -178,56 +181,48 @@ public class Board extends Application {
         //north
         index = getIndexFromRowCol(row-1,col);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //north east
         index = getIndexFromRowCol(row-1,col+1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //north west
         index = getIndexFromRowCol(row-1,col-1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //east
         index = getIndexFromRowCol(row,col+1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //west
         index = getIndexFromRowCol(row,col-1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //south
         index = getIndexFromRowCol(row+1,col);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //south east
         index = getIndexFromRowCol(row+1,col+1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         
         //south west
         index = getIndexFromRowCol(row+1,col-1);
         if(index >= 0 && index < (COLS*COLS)) {
-            MineButton sq = squares.get(index);
             neighbours.add(squares.get(index));
         }
         return neighbours;
@@ -235,8 +230,6 @@ public class Board extends Application {
     
     /**
      * return the correct array index based on the row and col specified
-     * @param int row the row
-     * @param int col the column
      * @return int the index
      */
     private int getIndexFromRowCol(int row, int col) {
@@ -274,7 +267,7 @@ public class Board extends Application {
             MineButton check = checkList.get(a);
             indexes.add(getIndexFromRowCol(check.getRow(), check.getCol()));
             
-            if(!check.isDisabled() && check.getMineCount() == 0 && !check.isAMine()) {
+            if(!check.isDisabled() && check.getMineCount() == 0 && check.isNotAMine()) {
                 check.setDisable(true);
                 cleared++;
                 ArrayList<MineButton> neighbours = getNeighbours(check);
@@ -283,7 +276,7 @@ public class Board extends Application {
                     MineButton neighbour = neighboursIterator.next();
                     if(!indexes.contains(getIndexFromRowCol(neighbour.getRow(), neighbour.getCol()))) {
                         indexes.add(getIndexFromRowCol(neighbour.getRow(), neighbour.getCol()));
-                        if(!neighbour.isDisabled() && !neighbour.isAMine()) {
+                        if(!neighbour.isDisabled() && neighbour.isNotAMine()) {
                             if(neighbour.getMineCount() == 0) {
                                 checkList.add(neighbour);
                             }
@@ -342,28 +335,24 @@ public class Board extends Application {
             winDialog = new Stage();
             winDialog.initModality(Modality.APPLICATION_MODAL);
             winDialog.initOwner(window);
-            
+
             Button okBtn = new Button("Continue");
             okBtn.setOnMouseClicked(this::resetBoardWin);
 
             Button exitBtn = new Button("Exit");
             exitBtn.setOnMouseClicked(this::exitGameBtn);
-            
-            
+
+
             VBox dialogVbox = new VBox(20);
             dialogVbox.setAlignment(Pos.CENTER);
             dialogVbox.getChildren().add(new Text("You Win! Play Again?"));
             dialogVbox.getChildren().add(okBtn);
             dialogVbox.getChildren().add(exitBtn);
-            
+
             Scene dialogScene = new Scene(dialogVbox, 300, 200);
             winDialog.setScene(dialogScene);
             winDialog.show();
         }
-        else {
-            System.out.println(Integer.toString(squaresToClear) + " > " + Integer.toString(cleared));
-        }
-        
     }
     
     private void resetBoardLose(MouseEvent event) {

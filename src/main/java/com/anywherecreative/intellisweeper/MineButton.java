@@ -1,7 +1,11 @@
+package com.anywherecreative.intellisweeper;
+
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ContentDisplay;
+
+import java.util.Objects;
 
 public class MineButton extends Button
 {
@@ -54,8 +58,8 @@ public class MineButton extends Button
         this.isMine = value;
     }
     
-    public boolean isAMine() {
-        return this.isMine;
+    public boolean isNotAMine() {
+        return !this.isMine;
     }
     
      public int getMineCount() {
@@ -74,7 +78,7 @@ public class MineButton extends Button
         isFlagged = !isFlagged;
         
         if(isFlagged) {
-            ImageView view = new ImageView(new Image("assets/flag-solid.png"));
+            ImageView view = new ImageView(new Image(MineButton.class.getResourceAsStream("/assets/flag-solid.png")));
             view.setFitHeight(Board.SQUARE_SIZE/3);
             view.setPreserveRatio(true);
             
@@ -92,7 +96,7 @@ public class MineButton extends Button
     
     public void setExploded(boolean exploded) {
         if(exploded) {
-            ImageView view = new ImageView(new Image("assets/explosion-solid.png"));
+            ImageView view = new ImageView(new Image(Objects.requireNonNull(MineButton.class.getResourceAsStream("/assets/explosion-solid.png"))));
             view.setFitHeight(Board.SQUARE_SIZE/3);
             view.setPreserveRatio(true);
             
@@ -112,7 +116,7 @@ public class MineButton extends Button
     
     public void revealMine() {
         if(isMine && !exploded) {
-            ImageView view = new ImageView(new Image("assets/bomb-solid.png"));
+            ImageView view = new ImageView(new Image(Objects.requireNonNull(MineButton.class.getResourceAsStream("/assets/bomb-solid.png"))));
             view.setFitHeight(Board.SQUARE_SIZE/3);
             view.setPreserveRatio(true);
             

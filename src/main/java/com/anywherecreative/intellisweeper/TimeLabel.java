@@ -1,3 +1,5 @@
+package com.anywherecreative.intellisweeper;
+
 import javafx.scene.control.Label;
 import java.io.InputStream;
 import javafx.scene.text.Font;
@@ -25,7 +27,7 @@ public class TimeLabel extends Label
         overtime = false;
 
         try {
-            InputStream fontStream = TimeLabel.class.getResourceAsStream("assets/digitaldream.ttf");
+            InputStream fontStream = TimeLabel.class.getResourceAsStream("/assets/digitaldream.ttf");
             if (fontStream != null) {
                 Font lcdFont = Font.loadFont(fontStream, 20);
                 fontStream.close();
